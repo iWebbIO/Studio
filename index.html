@@ -149,7 +149,7 @@
 
     // Check if user has already agreed
     if (localStorage.getItem('terms-agreed') === 'true') {
-      window.location.href = '/app';
+      window.location.href = '/Studio/app';
     }
 
     checkbox.addEventListener('change', () => {
@@ -167,7 +167,7 @@
     continueBtn.addEventListener('click', () => {
       if (continueBtn.disabled) return;
       localStorage.setItem('terms-agreed', 'true');
-      window.location.href = '/app';
+      window.location.href = '/Studio/app';
     });
   });
 </script>
