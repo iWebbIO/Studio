@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Studio</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader">
+            <span class="material-icons loader-icon">edit_note</span>
+            <div class="loader-text">Loading Markdown Studio...</div>
+            <div class="loader-spinner"></div>
+        </div>
+    </div>
+    <div class="app" style="display: none;" data-mode="normal">
+        <!-- OS Interface -->
+        <div class="os-interface" style="display: none;">
+            <div class="desktop">
+                <div class="desktop-icons"></div>
+            </div>
+            <div class="taskbar">
+                <div class="start-menu-button">
+                    <span class="material-icons">apps</span>
+                </div>
+                <div class="taskbar-items"></div>
+                <div class="taskbar-tray">
+                    <button onclick="toggleFullscreen()" title="Exit Immersive Mode" class="exit-immersive-button">
+                        <span class="material-icons">close</span>
+                    </button>
+                    <span class="material-icons" id="themeToggleOS">dark_mode</span>
+                    <span class="clock"></span>
+                </div>
+            </div>
+        </div>
+        <!-- Normal Interface -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <span class="material-icons">edit_note</span>
+                <h1>Markdown Studio</h1>
+            </div>
+            <div class="document-list">
+                <div class="folder-controls">
+                    <button onclick="createNewFolder()" title="New Folder">
+                        <span class="material-icons">create_new_folder</span>
+                    </button>
+                    <button onclick="createNewDocument()" title="New Document">
+                        <span class="material-icons">note_add</span>
+                    </button>
+                </div>
+                <div id="folderTree"></div>
+            </div>
+        </nav>
+        <main class="main-content">
+            <header class="toolbar">
+                <div class="document-controls">
+                    <input type="text" id="documentTitle" placeholder="Untitled Document" />
+                    <div class="save-indicator">
+                        <span class="material-icons">check_circle</span>
+                    </div>
+                    <span id="wordCount">Words: 0</span>
+                </div>
+                <div class="tools">
+                    <div class="tool-group">
+                        <button title="Bold (Ctrl+B)" onclick="insertMarkdown('**', '**')">
+                            <span class="material-icons">format_bold</span>
+                        </button>
+                        <button title="Italic (Ctrl+I)" onclick="insertMarkdown('*', '*')">
+                            <span class="material-icons">format_italic</span>
+                        </button>
+                        <button title="Strikethrough" onclick="insertMarkdown('~~', '~~')">
+                            <span class="material-icons">format_strikethrough</span>
+                        </button>
+                    </div>
+                    <div class="tool-group">
+                        <button title="Heading" onclick="showHeadingMenu(event)">
+                            <span class="material-icons">title</span>
+                        </button>
+                        <button title="Quote" onclick="insertMarkdown('> ', '')">
+                            <span class="material-icons">format_quote</span>
+                        </button>
+                        <button title="Code" onclick="insertMarkdown('```\n', '\n```')">
+                            <span class="material-icons">code</span>
+                        </button>
+                    </div>
+                    <div class="tool-group">
+                        <button title="Bullet List" onclick="insertMarkdown('- ', '')">
+                            <span class="material-icons">format_list_bulleted</span>
+                        </button>
+                        <button title="Numbered List" onclick="insertMarkdown('1. ', '')">
+                            <span class="material-icons">format_list_numbered</span>
+                        </button>
+                        <button title="Task List" onclick="insertMarkdown('- [ ] ', '')">
+                            <span class="material-icons">check_box</span>
+                        </button>
+                    </div>
+                    <div class="tool-group">
+                        <button title="Link (Ctrl+K)" onclick="insertMarkdown('[', '](url)')">
+                            <span class="material-icons">link</span>
+                        </button>
+                        <button title="Image" onclick="insertMarkdown('![alt text](', ')')">
+                            <span class="material-icons">image</span>
+                        </button>
+                        <button title="Table" onclick="showTableDialog()">
+                            <span class="material-icons">table_chart</span>
+                        </button>
+                    </div>
+                    <div class="tool-group">
+                        <select id="langSelect" onchange="changeDirection()">
+                            <option value="ltr">English</option>
+                            <option value="rtl">فارسی</option>
+                            <option value="rtl">عربي</option>
+                        </select>
+                        <button id="themeToggle" title="Toggle Theme">
+                            <span class="material-icons">dark_mode</span>
+                        </button>
+                        <button onclick="showExportMenu(event)" title="Export">
+                            <span class="material-icons">download</span>
+                        </button>
+                        <button onclick="toggleFullscreen()" title="Immersive Mode" class="immersive-button">
+                            <span class="material-icons">desktop_windows</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search in document..." />
+                    <button onclick="findNext()" title="Find Next">
+                        <span class="material-icons">arrow_downward</span>
+                    </button>
+                    <button onclick="findPrevious()" title="Find Previous">
+                        <span class="material-icons">arrow_upward</span>
+                    </button>
+                    <button onclick="toggleReplace()" title="Replace">
+                        <span class="material-icons">find_replace</span>
+                    </button>
+                </div>
+            </header>
+            <div class="content">
+                <div class="editor-container">
+                    <textarea id="editor" dir="ltr" spellcheck="true" placeholder="Start writing your Markdown here..."></textarea>
+                </div>
+                <div class="preview-container">
+                    <div id="preview" class="markdown-body"></div>
+                </div>
+            </div>
+            <footer class="status-bar">
+                <div class="status-left">
+                    <span id="cursorPosition">Line: 1, Column: 1</span>
+                    <span id="selectionCount">Selected: 0</span>
+                </div>
+                <div class="status-right">
+                    <button onclick="toggleSidebar()" title="Toggle Sidebar">
+                        <span class="material-icons">menu</span>
+                    </button>
+                    <button onclick="togglePreview()" title="Toggle Preview">
+                        <span class="material-icons">preview</span>
+                    </button>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Dialogs -->
+    <dialog id="tableDialog" class="dialog">
+        <h2>Insert Table</h2>
+        <div class="dialog-content">
+            <label>Rows: <input type="number" id="tableRows" value="3" min="1" max="50"></label>
+            <label>Columns: <input type="number" id="tableColumns" value="3" min="1" max="10"></label>
+        </div>
+        <div class="dialog-buttons">
+            <button onclick="insertTable()">Insert</button>
+            <button onclick="closeDialog('tableDialog')">Cancel</button>
+        </div>
+    </dialog>
+
+    <dialog id="exportDialog" class="dialog">
+        <h2>Export Document</h2>
+        <div class="dialog-content">
+            <button onclick="exportAs('markdown')">Markdown (.md)</button>
+            <button onclick="exportAs('html')">HTML (.html)</button>
+            <button onclick="exportAs('pdf')">PDF (.pdf)</button>
+        </div>
+        <button onclick="closeDialog('exportDialog')">Cancel</button>
+    </dialog>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="menu-item" data-action="new">
+            <span class="material-icons">note_add</span>
+            New Document
+        </div>
+        <div class="menu-item" data-action="newfolder">
+            <span class="material-icons">create_new_folder</span>
+            New Folder
+        </div>
+        <div class="menu-separator"></div>
+        <div class="menu-item" data-action="cut">
+            <span class="material-icons">content_cut</span>
+            Cut
+        </div>
+        <div class="menu-item" data-action="copy">
+            <span class="material-icons">content_copy</span>
+            Copy
+        </div>
+        <div class="menu-item" data-action="paste">
+            <span class="material-icons">content_paste</span>
+            Paste
+        </div>
+        <div class="menu-separator"></div>
+        <div class="menu-item" data-action="delete">
+            <span class="material-icons">delete</span>
+            Delete
+        </div>
+        <div class="menu-item" data-action="rename">
+            <span class="material-icons">drive_file_rename_outline</span>
+            Rename
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script src="db.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
